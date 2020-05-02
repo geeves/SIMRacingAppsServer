@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.SIMRacingApps;
 
@@ -69,11 +69,11 @@ import com.owlike.genson.Genson;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.management.OperatingSystemMXBean;
 
-import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer; 
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 
 /**
  * This class defines the static main() method used to start the internal server.
- * 
+ *
  * @author Jeffrey Gilliam
  * @copyright Copyright (C) 2015 - 2020 Jeffrey Gilliam
  * @since 1.0
@@ -85,26 +85,26 @@ public class Server {
     private static String m_log   = "SIMRacingApps";
     private static ConsoleHandler _console = null;
     private static FileHandler _file = null;
-    private static int m_port          = 80;
+    private static int m_port          = 43087;
     private static Map<String,String> m_args = new HashMap<String,String>();
     private static Genson m_genson = new Genson();
     private static Properties m_version = new Properties();
-    
+
     public static String getLog() {
         return m_log + "-0.log.txt";
     }
-    
+
     public static void setLog(String logname) {
         m_log = logname;
     }
-    
+
     public static Logger logger() {
 
         //if logger not initialized, setup a console handler
         if (_logger == null) {
             _logger = Logger.getLogger("com.SIMRacingApps");
             _logger.setLevel(Level.INFO);
-            
+
             _console = new ConsoleHandler();
             _console.setFormatter(new LogFormatter());
             _console.setLevel(_logger.getLevel());
@@ -117,7 +117,7 @@ public class Server {
             _console.setLevel(_logger.getLevel());
         if (_file != null && _logger.getLevel().intValue() != _file.getLevel().intValue())
             _file.setLevel(_logger.getLevel());
-        
+
         //If user wants a log file, setup a file handler.
         if (!m_log.isEmpty() && _file == null) {
             try {
@@ -135,7 +135,7 @@ public class Server {
                 Server.logStackTrace(e);
             }
         }
-        
+
         return _logger;
     }
 
@@ -147,7 +147,7 @@ public class Server {
         @Override
         public synchronized String format(LogRecord record) {
             StackTraceElement[] trace = (new Exception()).getStackTrace();
-            
+
             String className = "unknownClass";
             for (int caller=1; caller < trace.length; caller++) {
                 if (!trace[caller].toString().startsWith("java.util.logging.")
@@ -157,19 +157,19 @@ public class Server {
                     break;
                 }
             }
-            
-            return String.format("%s: %-7s: %s: %s[%s]%n", 
+
+            return String.format("%s: %-7s: %s: %s[%s]%n",
                     String.format("%1$tY%1$tm%1$td%1$tH%1$tM%1$tS.%1$tL", Calendar.getInstance()),
-                    record.getLevel(), 
+                    record.getLevel(),
                     record.getMessage(),
                     className,
                     Thread.currentThread().getName()
                     );
         }
     }
-    
+
     /**
-     * 
+     *
      * @param level The Level to log. Defaults to SEVERE.
      * @param message A message you provide to be logged with the trace.
      * @param trace An array to the stack trace.
@@ -196,10 +196,10 @@ public class Server {
             logger().log(level,s);
         }
     }
-    
+
     /**
      * This method should be used to log the entire stack trace to the log file.
-     * 
+     *
      * @param level (optional) The Level to log. Defaults to SEVERE.
      * @param message (optional) A message you provide to be logged with the trace.
      * @param exception The exception to get the trace from.
@@ -214,7 +214,7 @@ public class Server {
 
     /**
      * This method should be used to log the entire stack trace to the log file.
-     * 
+     *
      * @param level (optional) The Level to log. Defaults to SEVERE.
      * @param message (optional) A message you provide to be logged with the trace.
      * @param throwable The throwable obtained from an exception.
@@ -226,14 +226,14 @@ public class Server {
         if (message != null && !message.isEmpty())
             logger().log(level,throwable.getLocalizedMessage() + " " + message);
     }
-    
+
     public static void logStackTrace(Level level,Exception exception) {
         logStackTrace(level,"",exception);
     }
     public static void logStackTrace(Exception exception) {
         logStackTrace(Level.SEVERE,"",exception);
     }
-    
+
     /**
      * Use these methods to test if the specified level will actually log anything.
      * I do this in time critical sections to prevent forming the string to be logged,
@@ -258,13 +258,13 @@ public class Server {
     public static boolean isLogLevelSevere() {
         return logger().getLevel().intValue() <= Level.SEVERE.intValue();
     }
-    
+
     public static int getPort() {
         return m_port;
     }
-    
+
     /**
-     * Returns the value of the specified argument as a string. 
+     * Returns the value of the specified argument as a string.
      * The string will be empty if arg not found.
      * It is not case sensitive, all args are stored in lower case.
      * @param arg The argument name
@@ -275,9 +275,9 @@ public class Server {
             return m_args.get(arg.toLowerCase());
         return "";
     }
-    
+
     /**
-     * Returns the value of the specified argument as a string. 
+     * Returns the value of the specified argument as a string.
      * The defaultValue be returned if arg not found or blank.
      * It is not case sensitive, all args are stored in lower case.
      * All values are trimmed of leading and trailing spaces.
@@ -290,9 +290,9 @@ public class Server {
             return m_args.get(arg.toLowerCase()).trim();
         return defaultValue;
     }
-    
+
     /**
-     * Returns the value of the specified argument as a boolean. 
+     * Returns the value of the specified argument as a boolean.
      * The defaultValue will be returned if arg not found or blank.
      * It is not case sensitive, all args are stored in lower case.
      * @param arg The argument name
@@ -325,9 +325,9 @@ public class Server {
         catch (NumberFormatException e) {}
         return defaultValue;
     }
-    
+
     /**
-     * Returns the value of the specified argument as a integer. 
+     * Returns the value of the specified argument as a integer.
      * The defaultValue will be returned if arg not found or blank.
      * It is not case sensitive, all args are stored in lower case.
      * @param arg The argument name
@@ -344,9 +344,9 @@ public class Server {
         catch (NumberFormatException e) {}
         return defaultValue;
     }
-    
+
     /**
-     * Returns the value of the specified argument as a double. 
+     * Returns the value of the specified argument as a double.
      * The defaultValue will be returned if arg not found or blank.
      * It is not case sensitive, all args are stored in lower case.
      * @param arg The argument name
@@ -396,7 +396,7 @@ public class Server {
      * -settings {settingsFilename} The name of the settings file to use. Defaults to settings.txt.
      * <p>
      * -userpath {userPath}, A path where where users can add their own widgets and apps.
-     *                       It can be a list of directories separated by a semi-colon, just like the PATH environment variable. 
+     *                       It can be a list of directories separated by a semi-colon, just like the PATH environment variable.
      *                       All paths must be absolute paths,
      *                       Defaults to "%USERPROFILE%\Documents\SIMRacingApps".
      * <p>
@@ -404,7 +404,7 @@ public class Server {
      * <p>
      * -ip {IpAddress}, When users are connected to more than one network, this option forces
      *                  the server to bind to the specified address instead of the first one.
-     * 
+     *
      * @param args command line arguments
      */
     public static void parseArgs(String[] args) {
@@ -414,7 +414,7 @@ public class Server {
             try {
                 String arg = "";
                 String value = "";
-                        
+
                 if (args[i].startsWith("-") || args[i].startsWith("/")) {
                     arg = args[i].substring(1).toLowerCase();
                     value = "";
@@ -427,11 +427,11 @@ public class Server {
 //                    }
                     m_args.put(arg, value);
                 }
-                
+
                 if (m_args.containsKey("log")) {
                     Server.setLog(m_args.get("log"));
                 }
-                
+
                 if (arg.equals("settings") && !value.isEmpty()) {
                     settings = value;
                 }
@@ -448,7 +448,7 @@ public class Server {
                 System.exit(1);
             }
         }
-        
+
         InputStream is = null;
         try {
             Properties userProperties = new Properties();
@@ -459,10 +459,10 @@ public class Server {
             while (itr.hasNext()) {
                 Entry<Object, Object> entry = itr.next();
                 String key = (String) entry.getKey();
-                
+
                 if (key.startsWith("-") || key.startsWith("/"))
                     key = key.substring(1);
-                
+
                 if (!m_args.containsKey(key.toLowerCase())) {
                     m_args.put(key.toLowerCase(), (String)entry.getValue());
                     if (m_args.containsKey("log")) {
@@ -477,7 +477,7 @@ public class Server {
                     is.close();
                 } catch (IOException e) {}
         }
-        
+
         if (m_args.containsKey("log")) {
             Server.setLog(m_args.get("log"));
         }
@@ -490,16 +490,16 @@ public class Server {
                 Properties userProperties = new Properties();
                 FindFile settingsFile = new FindFile(sim+"."+settings);
                 Server.logger().info("Reading SIM settings from: "+settingsFile.toString());
-                
+
                 userProperties.load(is = settingsFile.getInputStream());
                 Iterator<Entry<Object, Object>> itr = userProperties.entrySet().iterator();
                 while (itr.hasNext()) {
                     Entry<Object, Object> entry = itr.next();
                     String key = (String) entry.getKey();
-                    
+
                     if (key.startsWith("-") || key.startsWith("/"))
                         key = key.substring(1);
-                    
+
                     if (!m_args.containsKey(key.toLowerCase()))
                         m_args.put(key.toLowerCase(), (String)entry.getValue());
                 }
@@ -511,11 +511,11 @@ public class Server {
                     } catch (IOException e) {}
             }
         }
-        
+
         if (m_args.containsKey("log")) {
             Server.setLog(m_args.get("log"));
         }
-        
+
         if (m_args.containsKey("level")) {
             try {
                 Level l = Level.parse(m_args.get("level"));
@@ -530,12 +530,12 @@ public class Server {
             SendKeys.setDelay(Integer.parseInt(m_args.get("sendkeysdelay")));
             logger().info(String.format("sendkeys delay = %d",SendKeys.getDelay()));
         }
-        
+
         logger().info(String.format("Logger.Level = %s",logger().getLevel().toString()));
 
         logArgs();
     }
-    
+
     /**
      * This is the main static method that Java will used to startup the server.
      * The server will create an internal Jetty instance and register all the servlets.
@@ -544,7 +544,9 @@ public class Server {
      * <p>
      * -sim {SIMName}, the name of the SIM to start for. Defaults to iRacing.
      * <p>
-     * -port {portNumber}, defaults to 80.
+     * -port {portNumber}, defaults to 43087.
+     * <p>
+     * -customhost {customHost}, defaults to simracingapps.io.
      * <p>
      * -play {playFile}, a file to play that was previously recorded by SIMRacingApps or by the SIM.
      * <p>
@@ -553,26 +555,26 @@ public class Server {
      * -startingVersion {version}, when playing back a file, start at this data point.
      * <p>
      * -endingVersion {version}, when playing back a file, stop at this data point.
-     * 
+     *
      * @param args command line arguments
      */
     //@SuppressWarnings("deprecation")
     private static Process electronProcess = null;
     private static Process browserProcess = null;
-    
-    public static String m_hostname = "";  //once the service starts up, it will populate this.
+
+    public static String m_hostname = "simracingapps.io";  //once the service starts up, it will populate this.
 
     private static org.eclipse.jetty.server.Server startServer(int port) throws Exception {
         //since my package is also named Server, I have to specify the entire path to Jetty
         org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(port);
-        
+
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         contextHandler.setContextPath("/");
         contextHandler.setResourceBase(System.getProperty("java.io.tmpdir"));
         server.setHandler(contextHandler);
-        
+
         ServletHolder servlet;
-        
+
         servlet = contextHandler.addServlet(ROOT.class,          "/");
         servlet = contextHandler.addServlet(SIMRacingApps.class, "/SIMRacingApps/*");
         servlet = contextHandler.addServlet(listings.class,      "/SIMRacingApps/listings");
@@ -588,32 +590,32 @@ public class Server {
         servlet.setInitOrder(0); //Jetty's way to load on startup
         servlet = contextHandler.addServlet(DataEvent.class,     "/SIMRacingApps/DataEvent");
         servlet = contextHandler.addServlet(ConsumerTester.class,"/SIMRacingApps/ConsumerTester");
-    
-        ServerContainer container = WebSocketServerContainerInitializer.configureContext(contextHandler); 
-         
-        // Add endpoint to server container 
-        ServerEndpointConfig socketConfig = ServerEndpointConfig.Builder.create(DataSocket.class,"/SIMRacingApps/DataSocket").build(); 
-        container.addEndpoint(socketConfig); 
 
-        // Add endpoint to server container 
-        ServerEndpointConfig streamingConfig = ServerEndpointConfig.Builder.create(DataStreaming.class,"/SIMRacingApps/DataStreaming").build(); 
-        container.addEndpoint(streamingConfig); 
-        
+        ServerContainer container = WebSocketServerContainerInitializer.configureContext(contextHandler);
+
+        // Add endpoint to server container
+        ServerEndpointConfig socketConfig = ServerEndpointConfig.Builder.create(DataSocket.class,"/SIMRacingApps/DataSocket").build();
+        container.addEndpoint(socketConfig);
+
+        // Add endpoint to server container
+        ServerEndpointConfig streamingConfig = ServerEndpointConfig.Builder.create(DataStreaming.class,"/SIMRacingApps/DataStreaming").build();
+        container.addEndpoint(streamingConfig);
+
         server.start();
         return server;
     }
-    
+
     public static void main(String[] args) {
 
         //look through the args and get the log file and userpath before doing anything else.
         String log = null;
         String userpath = null;
-        
+
         for (int i=0; i < args.length; i++) {
             try {
                 String arg = "";
                 String value = "";
-                        
+
                 if (args[i].startsWith("-") || args[i].startsWith("/")) {
                     arg = args[i].substring(1).toLowerCase();
                     value = "";
@@ -633,17 +635,17 @@ public class Server {
                 System.exit(1);
             }
         }
-        
+
         if (userpath != null)
             FindFile.setUserPath(userpath);
         if (log != null)
             Server.setLog(log);
-        
+
         //make sure the user's folders exists
         //make sure the user's first folder exists
         new File(FindFile.getUserPath()[0]+"/storage").mkdirs();
         new File(FindFile.getUserPath()[0]+"/favorites").mkdirs();
-        
+
         //see if the user has a settings.txt file and copy the default over if they don't
         FindFile default_settings = null;
         FindFile settings = null;
@@ -660,11 +662,11 @@ public class Server {
         default_settings = null;
         if (settings != null) settings.close();
         settings = null;
-        
+
         parseArgs(args);
-        
+
         Sound.loadMixers();     //load the sound mixers
-        
+
         if (!getArg("port").isEmpty()) {
             m_port = Integer.parseInt(getArg("port"));
             logger().info(String.format("Port = %d",m_port));
@@ -691,12 +693,12 @@ public class Server {
         }
 
         File tmpdir = new File(System.getProperty("java.io.tmpdir") + "SIMRacingApps");
-        
+
         logger().info(String.format("com.SIMRacingApps.main() using tmpdir = %s",tmpdir));
-        
+
         try {
             org.eclipse.jetty.server.Server server = null;
-            
+
             try {
                 server = startServer(m_port);
             } catch (BindException be) {
@@ -712,13 +714,14 @@ public class Server {
                     server = startServer(m_port);
                 }
             }
-            
+
             InputStream in;
             //see if the user want's to tell us what ip to bind to
             String ip = Server.getArg("ip", "" );
+            String customHost = Server.getArg("customhost", "simracingapps.io");
             try {
 
-                  String hostname = Server.getArg("hostname",InetAddress.getLocalHost().getHostName());
+                  String hostname = Server.getArg("hostname", InetAddress.getLocalHost().getHostName());
                   Server.logger().info("Hostname = " + hostname);
                   InetAddress[] addresses = InetAddress.getAllByName(hostname);
                   for (InetAddress addr : addresses) {
@@ -729,18 +732,18 @@ public class Server {
                           Server.logger().info("Found Address = " + host);
                       }
                   }
-            } 
+            }
             catch (UnknownHostException e) {
-                  Server.logStackTrace(Level.WARNING, "while getting IP address",e);
-            } 
-                      
+                  Server.logStackTrace(Level.WARNING, "while getting IP address", e);
+            }
+
             synchronized (Server.m_hostname) {
                   Server.m_hostname = ip;
             }
-            
-            ip = "http://" + ip + ((Server.getPort() == 80) ? "" : ":" + Server.getPort()); 
-            URLBroadcastThread.start(ip);
-            
+
+            String serverThread = "http://" + customHost + ((Server.getPort() == 80) ? "" : ":" + Server.getPort());
+            URLBroadcastThread.start(serverThread);
+
             if (isLogLevelFiner())
                 server.dumpStdErr();
 
@@ -753,7 +756,7 @@ public class Server {
                 String classpath = "";
                 for (int i=0; i < urls.length; i++)
                     classpath = classpath.length() > 0 ? ";" + urls[i].toString() : urls[i].toString();
-                    
+
                 in = loader.getResourceAsStream("com/SIMRacingApps/version.properties");
                 //in = new FileInputStream(config.getServletContext().getRealPath("") + "version.properties");
                 m_version.load(in);
@@ -765,20 +768,20 @@ public class Server {
                 try {
                     int iMHz = Advapi32Util.registryGetIntValue(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", "~MHz");
                     dGHz = iMHz / 1000.0;
-                    processor = Advapi32Util.registryGetStringValue(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", "ProcessorNameString"); 
-                }                
+                    processor = Advapi32Util.registryGetStringValue(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", "ProcessorNameString");
+                }
                 catch (Exception e) {
                     //log any exceptions, but keep on going
                     Server.logStackTrace(e);
                 }
-                
+
                 try {
                     OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
-    
+
     //In Java 10 access via reflection has been removed. Must call the methods directly.
                     OSInfo += String.format("%n%-35s %,d","OS TotalPhysicalMemorySize:", operatingSystemMXBean.getTotalPhysicalMemorySize());
                     OSInfo += String.format("%n%-35s %,d","OS FreePhysicalMemorySize:", operatingSystemMXBean.getFreePhysicalMemorySize());
-    
+
     //                for (Method method : operatingSystemMXBean.getClass().getDeclaredMethods()) {
     //                    method.setAccessible(true);
     //                    if (method.getName().startsWith("get")
@@ -803,7 +806,7 @@ public class Server {
                     //log any exceptions, but keep on going
                     Server.logStackTrace(e);
                 }
-                
+
                 Server.logger().info(
                       String.format("%n*************************************************************************************************")
                     + String.format("%n%s", (String)m_version.get("copyright"))
@@ -838,25 +841,25 @@ public class Server {
                       + (String)m_version.getProperty("minor")
                       + " Build: "
                       + (String)m_version.getProperty("build")
-                      + " @ " 
+                      + " @ "
                       + ip);
             } catch (IOException | SIMPluginException e) {
                 Server.logStackTrace(Level.WARNING, "while getting version",e);
             }
-            
+
             //Check if electron can be installed. If so, check version and install it, if needed.
             //default to false here so existing users will not get a surprise.
             //But, in the default settings.txt, I will have it set to true for new users.
-            
+
             if (getArg("electron-autoupdate",false) || getArg("electron-force-update",false)) {
- 
+
                 //Use the FindFile class to location the exe file
                 FindFile classFromJar = new FindFile("com/SIMRacingApps/default.settings.txt");
                 File jarFile = new File(URLDecoder.decode(classFromJar.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(),StandardCharsets.UTF_8.name()));
-                
+
                 if (jarFile.isFile()) {
                     String jarVersion = "", installedJarVersion="";
-                    
+
                     //get the version in the jar
                     InputStream is_p = classFromJar.getClass().getClassLoader().getResourceAsStream("electron-apps/package.json");
                     if (is_p != null) {
@@ -865,7 +868,7 @@ public class Server {
                         jarVersion = (String) packageJson.get("version");
                         is_p.close();
                     }
-                    
+
                     try {
                         File installedPackageJsonFile = new File(FindFile.getUserPath()[0]+"/electron-apps/package.json");
                         is_p = new FileInputStream(installedPackageJsonFile);
@@ -883,7 +886,7 @@ public class Server {
                     //if the versions are not equal, we need to install
                     if (!jarVersion.equals(installedJarVersion) || getArg("electron-force-update",false)) {
                         File exe = new File(getArg("electron-path",FindFile.getUserPath()[0]+"/electron-apps/electron/SIMRacingApps-electron.exe"));
-                        
+
                         ProcessBuilder processBuilder = new ProcessBuilder("tasklist.exe");
                         Process process = processBuilder.start();
                         Scanner scanner = new Scanner(process.getInputStream(), "UTF-8");
@@ -891,7 +894,7 @@ public class Server {
                         String tasksList = scanner.hasNext() ? scanner.next() : "";
                         scanner.close();
                         boolean isRunning = tasksList.contains(exe.getName());
-                        
+
                         if (isRunning) {
                             logger().info("Electron: " + exe.getName() + " is running. Cannot update Electron");
                         }
@@ -899,7 +902,7 @@ public class Server {
                             JarFile jar = new JarFile(jarFile);
                             String name = "";
                             logger().info("Electron: Installing from " + jarFile.toString());
-                            
+
                             try {
                                 Enumeration<JarEntry> entries = jar.entries();
                                 while (entries.hasMoreElements()) {
@@ -930,11 +933,11 @@ public class Server {
                     }
                 }
             }
-            
+
             if (getArg("electron-autostart",false)) {
                 try {
                     File exe = new File(getArg("electron-path",FindFile.getUserPath()[0]+"/electron-apps/electron/SIMRacingApps-electron.exe"));
-                    
+
                     ProcessBuilder processBuilder = new ProcessBuilder("tasklist.exe");
                     Process process = processBuilder.start();
                     Scanner scanner = new Scanner(process.getInputStream(), "UTF-8");
@@ -942,7 +945,7 @@ public class Server {
                     String tasksList = scanner.hasNext() ? scanner.next() : "";
                     scanner.close();
                     boolean isRunning = tasksList.contains(exe.getName());
-                    
+
                     if (isRunning) {
                         logger().info("Electron: " + exe.getName() + " is already running");
                     }
@@ -951,7 +954,7 @@ public class Server {
                         File dir = new File(FindFile.getUserPath()[0]+"/electron-apps");
                         List<String> a = new ArrayList<String>();
                         String s;
-                        
+
                         logger().info("Electron: Starting " + exe.toString());
                         a.add(exe.toString());
                         if (!(s = getArg("electron-options","")).isEmpty()) {
@@ -959,24 +962,24 @@ public class Server {
                             for (int i=0; i < sa.length; i++)
                                 a.add(sa[i]);
                         }
-                        
+
 //                        if (getArg("electron-disable-gpu",true)) {
 //                            a.add("--disable-gpu");  //prevents studdering on my machine
 //                                                     //use to be require for transparency, that's no longer the case as of electron 1.6
 //                        }
-                        
+
                         a.add(Server.getArg("electron-apps",FindFile.getUserPath()[0]+"/electron-apps"));
-                        
+
                         if (!(s = getArg("electron-client-options","")).isEmpty()) {
                             String[] sa = s.split(" ");
                             for (int i=0; i < sa.length; i++)
                                 a.add(sa[i]);
                         }
-                        
+
                         //the host has to be the same computer, so force it.
                         a.add("-hostname");
                         a.add(Server.getArg("electron-hostname",m_hostname));
-                        
+
                         //always pass the port in case Electron saved the wrong one
                         a.add("-port");
                         a.add(Integer.toString(m_port));
@@ -989,20 +992,20 @@ public class Server {
                         s = System.getProperty("user.language")+"-"+System.getProperty("user.country");
                         a.add("-lang");
                         a.add(getArg("electron-lang",s.toLowerCase()));  //let the user override the system's language
-                        
+
                         if (!(s = getArg("electron-configuration","")).isEmpty()) {
                             a.add("-configuration");
                             a.add(s);
                         }
-                        
+
                         if (!getArg("electron-noclickthrough",true)) {
                             a.add("-noclickthrough");
                         }
-                        
+
                         if (getArg("electron-showappsontaskbar",false)) {
                             a.add("-showappsontaskbar");
                         }
-                        
+
                         ProcessBuilder pb = new ProcessBuilder(a);
                         Map<String,String> env = pb.environment();
                         env.put("ELECTRON_NO_ATTACH_CONSOLE","true");
@@ -1020,7 +1023,7 @@ public class Server {
                                             electronProcess.getErrorStream()
                                     )
                             );
-                            
+
                             String line;
                             while ((line = stdin.readLine()) != null)
                                 logger().fine("Electron: "+line);
@@ -1045,11 +1048,11 @@ public class Server {
             else
             if (getArg("browser-autostart",false) || !getArg("app-autostart-url","").isEmpty()) {
                 File exe = new File(getArg("cmd-path",System.getenv("ComSpec")));
-                
+
                 if (exe.canExecute()) {
                     List<String> a = new ArrayList<String>();
                     String s;
-                    
+
                     logger().info("Browser: Starting " + exe.toString());
                     //wait for the service to start up
                     while (true) {
@@ -1058,7 +1061,7 @@ public class Server {
                                 break;
                         }
                     }
-                    
+
                     a.add(exe.toString());
                     a.add("/c");
                     a.add("start");
@@ -1066,7 +1069,7 @@ public class Server {
                     s = System.getProperty("user.language")+"-"+System.getProperty("user.country");
                     String url = "http://"+Server.getArg("browser-hostname",m_hostname)+":"+m_port + Server.getArg("app-autostart-url","?lang="+getArg("browser-lang",s.toLowerCase()));
                     a.add(url);
-                    
+
                     ProcessBuilder pb = new ProcessBuilder(a);
                     browserProcess = pb.start();
                     logger().info("Browser: Started with " + a.toString() );
@@ -1081,7 +1084,7 @@ public class Server {
                                         browserProcess.getErrorStream()
                                 )
                         );
-                        
+
                         String line;
                         while ((line = stdin.readLine()) != null)
                             logger().fine("Browser: "+line);
@@ -1091,7 +1094,7 @@ public class Server {
                     }
                 }
             }
-            
+
             //TODO: can't get this to work when the CMD window is closed
             Runtime.getRuntime().addShutdownHook(new Thread()
             {
@@ -1103,7 +1106,7 @@ public class Server {
                     }
                 }
             });
-            
+
             server.join();
         } catch (BindException be) {
 //            for (Thread t : Thread.getAllStackTraces().keySet()) {
