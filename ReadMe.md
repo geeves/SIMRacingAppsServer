@@ -4,7 +4,7 @@ This is a Fork of the [SIMRacingAppsServer](https://github.com/SIMRacingApps/SIM
 and all because I did not want to work in the AngularJS framework which 
 I dragged out... in to a dark alley. And shot. Execution-style... back in 2015.
 
-The main goal of this was to cure boredom at home when not working or on [iRacing](https://iracing.com) and trying to be productive.
+The main goal of this was to cure COVID boredom at home when not working or on [iRacing](https://iracing.com) and trying to be productive.
 
 When starting to create an app based on SRA's API, and since I don't do much dev on Windows I needed a way to 
 communicate the SRA server.  That immediately lead to issues with CORS and how to create a maze of workflow 
