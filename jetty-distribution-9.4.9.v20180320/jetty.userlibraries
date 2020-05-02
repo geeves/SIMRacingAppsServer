@@ -9,6 +9,7 @@
         <archive path="/SIMRacingAppsServer/jetty-distribution-9.4.9.v20180320/lib/jetty-servlet-9.4.9.v20180320.jar"/>
         <archive path="/SIMRacingAppsServer/jetty-distribution-9.4.9.v20180320/lib/jetty-util-9.4.9.v20180320.jar"/>
         <archive path="/SIMRacingAppsServer/jetty-distribution-9.4.9.v20180320/lib/servlet-api-3.1.jar"/>
+        <archive path="/SIMRacingAppsServer/jetty-distribution-9.4.9.v20180320/lib/oshi-core-4.7.1.jar"/>
         <archive path="/SIMRacingAppsServer/jetty-distribution-9.4.9.v20180320/lib/websocket/javax-websocket-client-impl-9.4.9.v20180320.jar"/>
         <archive path="/SIMRacingAppsServer/jetty-distribution-9.4.9.v20180320/lib/websocket/javax-websocket-server-impl-9.4.9.v20180320.jar"/>
         <archive path="/SIMRacingAppsServer/jetty-distribution-9.4.9.v20180320/lib/websocket/javax.websocket-api-1.0.jar"/>

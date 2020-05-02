@@ -727,8 +727,9 @@ public class Server {
                   for (InetAddress addr : addresses) {
                       String host = addr.getHostAddress();
                       if (addr instanceof Inet4Address) {
-                          if (ip.isEmpty()) //this will use the first one found, but list them all in the log
+                          if (ip.isEmpty()) { //this will use the first one found, but list them all in the log
                               ip = host;
+                          }
                           Server.logger().info("Found Address = " + host);
                       }
                   }
@@ -738,14 +739,15 @@ public class Server {
             }
 
             synchronized (Server.m_hostname) {
-                  Server.m_hostname = ip;
+                  Server.m_hostname = customHost;
             }
 
-            String serverThread = "http://" + customHost + ((Server.getPort() == 80) ? "" : ":" + Server.getPort());
+            String serverThread = "http://" + Server.getHostname() + ((Server.getPort() == 80) ? "" : ":" + Server.getPort());
             URLBroadcastThread.start(serverThread);
 
-            if (isLogLevelFiner())
+            if (isLogLevelFiner()) {
                 server.dumpStdErr();
+            }
 
             try {
                 String userPath = FindFile.getUserPath()[0];
@@ -1025,10 +1027,12 @@ public class Server {
                             );
 
                             String line;
-                            while ((line = stdin.readLine()) != null)
+                            while ((line = stdin.readLine()) != null) {
                                 logger().fine("Electron: "+line);
-                            while ((line = stderr.readLine()) != null)
+                            }
+                            while ((line = stderr.readLine()) != null) {
                                 logger().warning("Electron: "+line);
+                            }
                             Thread.sleep(1000);
                         }
                         logger().info("Electron: Stopped" );
@@ -1132,4 +1136,9 @@ public class Server {
         }
         System.exit(0);
     }
+
+    public static String getHostname() {
+        return m_hostname;
+    }
+
 }
