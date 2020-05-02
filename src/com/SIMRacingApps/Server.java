@@ -81,14 +81,21 @@ import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainer
  */
 public class Server {
 
+    private final static int PORT_8080 = 8080;
+    private final static int PORT_5050 = 5050;
+
     private static Logger _logger = null;
     private static String m_log   = "SIMRacingApps";
     private static ConsoleHandler _console = null;
     private static FileHandler _file = null;
-    private static int m_port          = 43087;
-    private static Map<String,String> m_args = new HashMap<String,String>();
+    private static int SERVER_PORT = 43087;
+    private static String SERVER_HOST = "simracingapps.io"; //once the service starts up, it will populate this
+    private static Process electronProcess = null;
+    private static Process browserProcess = null;
+    private static Map<String,String> argMap = new HashMap<>();
     private static Genson m_genson = new Genson();
     private static Properties m_version = new Properties();
+
 
     public static String getLog() {
         return m_log + "-0.log.txt";
@@ -260,7 +267,7 @@ public class Server {
     }
 
     public static int getPort() {
-        return m_port;
+        return getServerPort();
     }
 
     /**
@@ -271,8 +278,9 @@ public class Server {
      * @return The value of the argument
      */
     public static String getArg(String arg) {
-        if (m_args.containsKey(arg.toLowerCase()))
-            return m_args.get(arg.toLowerCase());
+        if (argMap.containsKey(arg.toLowerCase())){
+            return argMap.get(arg.toLowerCase());
+        }
         return "";
     }
 
@@ -285,9 +293,10 @@ public class Server {
      * @param defaultValue The value to use if argument not found
      * @return The value of the argument
      */
-    public static String getArg(String arg,String defaultValue) {
-        if (m_args.containsKey(arg.toLowerCase()))
-            return m_args.get(arg.toLowerCase()).trim();
+    public static String getArg(String arg, String defaultValue) {
+        if (argMap.containsKey(arg.toLowerCase())){
+            return argMap.get(arg.toLowerCase()).trim();
+        }
         return defaultValue;
     }
 
@@ -299,7 +308,7 @@ public class Server {
      * @param defaultValue The value to use if argument not found
      * @return The value of the argument
      */
-    public static boolean getArg(String arg,boolean defaultValue) {
+    public static boolean getArg(String arg, boolean defaultValue) {
         String s = getArg(arg);
         if (s.isEmpty())
             return defaultValue;
@@ -334,7 +343,7 @@ public class Server {
      * @param defaultValue The value to use if argument not found
      * @return The value of the argument
      */
-    public static int getArg(String arg,int defaultValue) {
+    public static int getArg(String arg, int defaultValue) {
         String s = getArg(arg);
         if (s.isEmpty())
             return defaultValue;
@@ -353,7 +362,7 @@ public class Server {
      * @param defaultValue The value to use if argument not found
      * @return The value of the argument
      */
-    public static double getArg(String arg,double defaultValue) {
+    public static double getArg(String arg, double defaultValue) {
         String s = getArg(arg);
         if (s.isEmpty())
             return defaultValue;
@@ -368,7 +377,7 @@ public class Server {
      * This method sends all the arguments to the log.
      */
     public static void logArgs() {
-        for (Iterator<Entry<String, String>> itr = m_args.entrySet().iterator(); itr.hasNext();) {
+        for (Iterator<Entry<String, String>> itr = argMap.entrySet().iterator(); itr.hasNext();) {
             Entry<String, String> entry = itr.next();
             //don't log the secrets
             if (entry.getKey().toLowerCase().endsWith("-apikey")
@@ -425,11 +434,11 @@ public class Server {
 //                        value = "";
 //                        i--;
 //                    }
-                    m_args.put(arg, value);
+                    argMap.put(arg, value);
                 }
 
-                if (m_args.containsKey("log")) {
-                    Server.setLog(m_args.get("log"));
+                if (argMap.containsKey("log")) {
+                    Server.setLog(argMap.get("log"));
                 }
 
                 if (arg.equals("settings") && !value.isEmpty()) {
@@ -463,10 +472,10 @@ public class Server {
                 if (key.startsWith("-") || key.startsWith("/"))
                     key = key.substring(1);
 
-                if (!m_args.containsKey(key.toLowerCase())) {
-                    m_args.put(key.toLowerCase(), (String)entry.getValue());
-                    if (m_args.containsKey("log")) {
-                        Server.setLog(m_args.get("log"));
+                if (!argMap.containsKey(key.toLowerCase())) {
+                    argMap.put(key.toLowerCase(), (String)entry.getValue());
+                    if (argMap.containsKey("log")) {
+                        Server.setLog(argMap.get("log"));
                     }
                 }
             }
@@ -478,12 +487,12 @@ public class Server {
                 } catch (IOException e) {}
         }
 
-        if (m_args.containsKey("log")) {
-            Server.setLog(m_args.get("log"));
+        if (argMap.containsKey("log")) {
+            Server.setLog(argMap.get("log"));
         }
 
         //now load a {sim}.settings.txt file
-        String sim = m_args.containsKey("sim") ? m_args.get("sim") : "";
+        String sim = argMap.containsKey("sim") ? argMap.get("sim") : "";
         if (!sim.isEmpty()) {
             is = null;
             try {
@@ -500,8 +509,8 @@ public class Server {
                     if (key.startsWith("-") || key.startsWith("/"))
                         key = key.substring(1);
 
-                    if (!m_args.containsKey(key.toLowerCase()))
-                        m_args.put(key.toLowerCase(), (String)entry.getValue());
+                    if (!argMap.containsKey(key.toLowerCase()))
+                        argMap.put(key.toLowerCase(), (String)entry.getValue());
                 }
             } catch (IOException e) {}
             finally {
@@ -512,22 +521,22 @@ public class Server {
             }
         }
 
-        if (m_args.containsKey("log")) {
-            Server.setLog(m_args.get("log"));
+        if (argMap.containsKey("log")) {
+            Server.setLog(argMap.get("log"));
         }
 
-        if (m_args.containsKey("level")) {
+        if (argMap.containsKey("level")) {
             try {
-                Level l = Level.parse(m_args.get("level"));
+                Level l = Level.parse(argMap.get("level"));
                 if (l != null) {
                     logger().setLevel(l);
                 }
             } catch (IllegalArgumentException e) {
-                logger().warning("level = " + m_args.get("level") + " is an invalid level");
+                logger().warning("level = " + argMap.get("level") + " is an invalid level");
             }
         }
-        if (m_args.containsKey("sendkeysdelay")) {
-            SendKeys.setDelay(Integer.parseInt(m_args.get("sendkeysdelay")));
+        if (argMap.containsKey("sendkeysdelay")) {
+            SendKeys.setDelay(Integer.parseInt(argMap.get("sendkeysdelay")));
             logger().info(String.format("sendkeys delay = %d",SendKeys.getDelay()));
         }
 
@@ -546,7 +555,7 @@ public class Server {
      * <p>
      * -port {portNumber}, defaults to 43087.
      * <p>
-     * -customhost {customHost}, defaults to simracingapps.io.
+     * -server-hostname {serverHost}, defaults to simracingapps.io.
      * <p>
      * -play {playFile}, a file to play that was previously recorded by SIMRacingApps or by the SIM.
      * <p>
@@ -556,16 +565,12 @@ public class Server {
      * <p>
      * -endingVersion {version}, when playing back a file, stop at this data point.
      *
-     * @param args command line arguments
      */
     //@SuppressWarnings("deprecation")
-    private static Process electronProcess = null;
-    private static Process browserProcess = null;
-
-    public static String m_hostname = "simracingapps.io";  //once the service starts up, it will populate this.
 
     private static org.eclipse.jetty.server.Server startServer(int port) throws Exception {
         //since my package is also named Server, I have to specify the entire path to Jetty
+        Server.logger().info("Port try is: " + port);
         org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(port);
 
         ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -605,8 +610,10 @@ public class Server {
         return server;
     }
 
-    public static void main(String[] args) {
-
+    // Refactored out of main().
+    // These would probably be better suited in a static block
+    // to avoid reassiging what should be final fields.
+    private static void initializeArguments(String[] args) {
         //look through the args and get the log file and userpath before doing anything else.
         String log = null;
         String userpath = null;
@@ -636,17 +643,24 @@ public class Server {
             }
         }
 
-        if (userpath != null)
+        if (userpath != null){
             FindFile.setUserPath(userpath);
-        if (log != null)
+        }
+        if (log != null){
             Server.setLog(log);
+        }
 
         //make sure the user's folders exists
         //make sure the user's first folder exists
         new File(FindFile.getUserPath()[0]+"/storage").mkdirs();
         new File(FindFile.getUserPath()[0]+"/favorites").mkdirs();
 
-        //see if the user has a settings.txt file and copy the default over if they don't
+        // See if the user has a settings.txt file and copy the default over if they don't
+        // TODO: This would actually be better in the build process.
+        // These should all be final fields & unable to be modified.
+        // Have default.properties available but specify the user's settings
+        // in an .env file to be copied and passed into the app during build.
+        //
         FindFile default_settings = null;
         FindFile settings = null;
         try {
@@ -658,18 +672,25 @@ public class Server {
                 FindFile.copy(default_settings,new File(FindFile.getUserDocumentsPath()+"/SIMRacingApps/settings.txt"));
             }
         }
-        if (default_settings != null) default_settings.close();
+        if (default_settings != null) {
+            default_settings.close();
+        }
         default_settings = null;
-        if (settings != null) settings.close();
+        if (settings != null) {
+            settings.close();
+        }
         settings = null;
 
         parseArgs(args);
 
-        Sound.loadMixers();     //load the sound mixers
-
         if (!getArg("port").isEmpty()) {
-            m_port = Integer.parseInt(getArg("port"));
-            logger().info(String.format("Port = %d",m_port));
+            SERVER_PORT = Integer.parseInt(getArg("port"));
+            logger().info(String.format("Server Port = %d", SERVER_PORT));
+        }
+
+        if (!getArg("browser-host").isEmpty()) {
+            SERVER_HOST = Server.getArg("browser-hostname", "simracingapps.io");
+            logger().info(String.format("Port = %s", SERVER_HOST));
         }
 
         if (!getArg("play").isEmpty()) {
@@ -692,45 +713,60 @@ public class Server {
             DataService.setSIMname(getArg("sim"));
         }
 
+    }
+
+
+    public static void main(String[] args) {
+
+        initializeArguments(args);
+
+        Sound.loadMixers();     //load the sound mixers
+
         File tmpdir = new File(System.getProperty("java.io.tmpdir") + "SIMRacingApps");
 
-        logger().info(String.format("com.SIMRacingApps.main() using tmpdir = %s",tmpdir));
+        logger().info(String.format("com.SIMRacingApps.main() using tmpdir = %s", tmpdir));
 
+        initialize();
+        System.exit(0);
+    }
+
+    private static void initialize() {
         try {
             org.eclipse.jetty.server.Server server = null;
 
             try {
-                server = startServer(m_port);
+                server = startServer(SERVER_PORT);
             } catch (BindException be) {
                 try {
                     //if requested port is in use, try 8080
-                    logger().warning(String.format("Port %s in use, trying 8080",m_port));
-                    m_port = 8080;
-                    server = startServer(m_port);
+                    logger().warning(String.format("Port %s in use, trying %d", SERVER_PORT, PORT_8080));
+
+                    server = startServer(PORT_8080);
                 } catch (BindException be2) {
                     //if 8080 is in use, try 5555
-                    logger().warning(String.format("Port 8080 in use, trying 5555"));
-                    m_port = 5555;
-                    server = startServer(m_port);
+                    logger().warning(String.format("Port 8080 in use, trying 5050"));
+
+                    server = startServer(PORT_5050);
                 }
             }
 
-            InputStream in;
+
             //see if the user want's to tell us what ip to bind to
             String ip = Server.getArg("ip", "" );
-            String customHost = Server.getArg("customhost", "simracingapps.io");
+            //String browserHost = Server.getArg("browser-hostname", "simracingapps.io");
             try {
 
-                  String hostname = Server.getArg("hostname", InetAddress.getLocalHost().getHostName());
-                  Server.logger().info("Hostname = " + hostname);
+                  String hostname = getArg(SERVER_HOST, InetAddress.getLocalHost().getHostName());
+                  Server.logger().info("Server Hostname = " + hostname);
                   InetAddress[] addresses = InetAddress.getAllByName(hostname);
                   for (InetAddress addr : addresses) {
                       String host = addr.getHostAddress();
                       if (addr instanceof Inet4Address) {
                           if (ip.isEmpty()) { //this will use the first one found, but list them all in the log
-                              ip = host;
+                              ip = SERVER_HOST;
                           }
                           Server.logger().info("Found Address = " + host);
+                          Server.logger().info("Found Port = " + host);
                       }
                   }
             }
@@ -738,17 +774,14 @@ public class Server {
                   Server.logStackTrace(Level.WARNING, "while getting IP address", e);
             }
 
-            synchronized (Server.m_hostname) {
-                  Server.m_hostname = customHost;
-            }
-
-            String serverThread = "http://" + Server.getHostname() + ((Server.getPort() == 80) ? "" : ":" + Server.getPort());
+            String serverThread = "http://" + SERVER_HOST + ((Server.getPort() == 80) ? "" : ":" + Server.getPort());
             URLBroadcastThread.start(serverThread);
 
             if (isLogLevelFiner()) {
                 server.dumpStdErr();
             }
 
+            InputStream in;
             try {
                 String userPath = FindFile.getUserPath()[0];
                 new File(userPath).mkdirs();
@@ -857,7 +890,7 @@ public class Server {
 
                 //Use the FindFile class to location the exe file
                 FindFile classFromJar = new FindFile("com/SIMRacingApps/default.settings.txt");
-                File jarFile = new File(URLDecoder.decode(classFromJar.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(),StandardCharsets.UTF_8.name()));
+                File jarFile = new File(URLDecoder.decode(classFromJar.getClass().getProtectionDomain().getCodeSource().getLocation().getPath(), StandardCharsets.UTF_8.name()));
 
                 if (jarFile.isFile()) {
                     String jarVersion = "", installedJarVersion="";
@@ -980,11 +1013,11 @@ public class Server {
 
                         //the host has to be the same computer, so force it.
                         a.add("-hostname");
-                        a.add(Server.getArg("electron-hostname",m_hostname));
+                        a.add(Server.getArg("electron-hostname", SERVER_HOST));
 
                         //always pass the port in case Electron saved the wrong one
                         a.add("-port");
-                        a.add(Integer.toString(m_port));
+                        a.add(Integer.toString(SERVER_PORT));
 
                         if (!getArg("electron-disable-gpu",true)) {
                             a.add("-enableHardwareAcceleration");
@@ -1048,21 +1081,21 @@ public class Server {
                 } catch (Exception e1) {
                   logStackTrace(Level.WARNING,e1);
                 }
-            }
-            else
-            if (getArg("browser-autostart",false) || !getArg("app-autostart-url","").isEmpty()) {
+            } else if (getArg("browser-autostart",false)
+                            || !getArg("app-autostart-url","").isEmpty()) {
                 File exe = new File(getArg("cmd-path",System.getenv("ComSpec")));
 
                 if (exe.canExecute()) {
-                    List<String> a = new ArrayList<String>();
+                    List<String> a = new ArrayList<>();
                     String s;
 
                     logger().info("Browser: Starting " + exe.toString());
                     //wait for the service to start up
                     while (true) {
-                        synchronized (m_hostname) {
-                            if (!m_hostname.isEmpty())
+                        synchronized (SERVER_HOST) {
+                            if (!SERVER_HOST.isEmpty()) {
                                 break;
+                            }
                         }
                     }
 
@@ -1071,7 +1104,10 @@ public class Server {
                     a.add("start");
                     a.add("\"SIMRacingApps\"");
                     s = System.getProperty("user.language")+"-"+System.getProperty("user.country");
-                    String url = "http://"+Server.getArg("browser-hostname",m_hostname)+":"+m_port + Server.getArg("app-autostart-url","?lang="+getArg("browser-lang",s.toLowerCase()));
+                    String url = "http://" +
+                            Server.getArg("browser-hostname", SERVER_HOST) +
+                            ":" + SERVER_PORT +
+                            Server.getArg("app-autostart-url","?lang="+getArg("browser-lang",s.toLowerCase()));
                     a.add(url);
 
                     ProcessBuilder pb = new ProcessBuilder(a);
@@ -1134,11 +1170,13 @@ public class Server {
             try { System.in.read(); } catch (IOException e) {}
             System.exit(1);
         }
-        System.exit(0);
     }
 
-    public static String getHostname() {
-        return m_hostname;
+    public static int getServerPort() {
+        return SERVER_PORT;
     }
 
+    public static String getServerHost() {
+        return SERVER_HOST;
+    }
 }

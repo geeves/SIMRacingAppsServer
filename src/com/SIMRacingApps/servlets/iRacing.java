@@ -31,6 +31,7 @@ import com.SIMRacingApps.Server;
 public class iRacing extends HttpServlet {
 
     private static final long serialVersionUID = 5554696825559093720L;
+    private static final int IRACING_PORT = 32034;
 
     public iRacing() {
     }
@@ -51,9 +52,9 @@ public class iRacing extends HttpServlet {
         }
 
         String path = request.getRequestURI().replace("/SIMRacingApps/iRacing/", "");
-        String hostName = Server.getHostname();
+        String hostName = Server.getServerHost();
         if (!"".equals(path)) {
-            String requestUrl = "http://" + hostName + ":32034/" + path + "?" + request.getQueryString() + "&nocache=" + Long.toString(System.currentTimeMillis());
+            String requestUrl = "http://" + hostName + ":" + IRACING_PORT + "/" + path + "?" + request.getQueryString() + "&nocache=" + System.currentTimeMillis();
 
             if (Server.isLogLevelFine()) {
                 Server.logger().fine(String.format("doGet(%s) calling iRacing server %s", request.getRequestURL(), path));

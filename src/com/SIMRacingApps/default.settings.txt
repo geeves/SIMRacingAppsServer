@@ -15,6 +15,7 @@
 # (See comments below)
 #####################################################################
 port = 43087
+server-port = 43087
 
 #####################################################################
 ### The custom host name that is reflected in Windows / etc/hosts
@@ -24,7 +25,8 @@ port = 43087
 # if you're looking to just use the API and not the provided Widgets
 # and looking to make your own Electron / Angular / React App.
 #####################################################################
-customhost = simracingapps.io
+browser-hostname = simracingapps.io
+server-hostname = simracingapps.io
 
 
 #####################################################################
