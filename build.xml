@@ -5,12 +5,20 @@
     <script language="javascript">
         var logger = project.getBuildListeners().firstElement();
         var verboseMode = project.getProperty( "verboseFlag" )
-        if ( ! "0".equals( verboseMode ) )
+        if ( ! "0".equals( verboseMode ) ) {
             logger.setMessageOutputLevel( 9 );
+        }
     </script>
     <property name="build.major" value="1" />
     <property name="build.minor" value="13" />
     <property name="build.prefix" value="BETA-" />
+    <loadproperties srcFile=".env">
+        <filterchain>
+            <linecontains>
+                <contains value="cert."/>
+            </linecontains>
+        </filterchain>
+    </loadproperties>
     <!--property name="build.prefix" value="BETA-" /-->
     <tstamp>
         <format property="build.time" pattern="yyyy.MM.dd.HH.mm.ss" />
@@ -27,6 +35,7 @@
     <tstamp>
         <format property="build.day" pattern="dd" />
     </tstamp>
+
     <property environment="env" />
     <property name="userpath" value="${user.home}/Documents/SIMRacingApps" />
     <property name="javadoc.location" value="${userpath}/JavaDoc" />
@@ -37,11 +46,18 @@
     <!--property name="ECLIPSE_HOME" value="O:/OneDrive/PortableApps/EclipsePortable/App/Eclipse/" /-->
     <property name="JETTY_VERSION" value="9.4.9.v20180320" />
     <property name="JETTY" value="jetty-distribution-${JETTY_VERSION}" />
+    <property name="RESOURCES" value="resources"/>
     <property name="debuglevel" value="source,lines,vars" />
     <property name="target" value="1.8" />
     <property name="source" value="1.8" />
     <property name="version.properties" value="src/com/SIMRacingApps/version.properties" />
-    
+    <property name="server.properties" value="resources/default.settings.properties" />
+
+<!-- Will need to add copy file from user's .env file possibly. Later though.   -->
+    <path id="ServerSettingsPropertiesClassPath">
+        <pathelement location="WebContent/WEB-INF/classes/default.settings.properties"/>
+    </path>
+
     <path id="Web App Libraries.libraryclasspath">
         <pathelement location="WebContent/WEB-INF/lib/jna-platform-5.3.1.jar" />
         <pathelement location="WebContent/WEB-INF/lib/jna-5.3.1.jar" />
@@ -86,9 +102,13 @@
     <target name="build-subprojects" />
     <target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}" />
+        <copy file="resources/default.settings.properties"
+              tofile="WebContent/WEB-INF/classes/default.settings.properties"
+              id="DefaultSettingsProperties" />
         <javac debug="true" debuglevel="${debuglevel}" destdir="WebContent/WEB-INF/classes" includeantruntime="false" source="${source}" target="${target}">
             <src path="src" />
             <classpath refid="SIMRacingAppsServer.classpath" />
+            <classpath refid="ServerSettingsPropertiesClassPath"/>
         </javac>
     </target>
     <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
@@ -148,12 +168,14 @@
     <target name="jar" description="Bundles the application as a JAR file" depends="clean, version, build, javadoc">
         <sequential>
             <property file="${version.properties}" prefix="version" />
+            <property file="${server.properties}" prefix="server"/>
             <property name="version" value="${version.major}.${version.minor}_Build_${version.build}" />
             <jar destfile="${java.io.tmpdir}/SIMRacingAppsServer.jar">
                 <manifest>
                     <attribute name="Manifest-Version" value="${version}" />
                     <attribute name="Created-By" value="Jeffrey Gilliam" />
                     <attribute name="Main-Class" value="com.SIMRacingApps.Server" />
+
                 </manifest>
                 <zipgroupfileset file="${JETTY}/lib/jetty-client-${JETTY_VERSION}.jar" />
                 <zipgroupfileset file="${JETTY}/lib/jetty-http-${JETTY_VERSION}.jar" />
